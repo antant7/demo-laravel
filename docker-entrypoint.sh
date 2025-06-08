@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Wait for database to be ready
 echo "Waiting for database..."
@@ -25,6 +25,6 @@ php artisan route:cache
 php artisan view:cache
 php artisan event:cache
 
-# Start php-fpm
-echo "Starting PHP-FPM..."
-exec php-fpm
+# Start Octane with Swoole
+echo "Starting Octane with Swoole..."
+exec php artisan octane:start --server=swoole --host=0.0.0.0 --port=8000

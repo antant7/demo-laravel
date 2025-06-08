@@ -1,64 +1,69 @@
-# Use the official PHP image
-FROM php:8.3.22-fpm-alpine3.21
+FROM php:8.3-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    bash \
+    git \
+    unzip \
+    curl \
+    icu-dev \
+    libxml2-dev \
+    libzip-dev \
+    oniguruma-dev \
+    zlib-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    autoconf \
+    build-base \
+    linux-headers \
+    libstdc++ \
+    openssl \
+    shadow \
+    brotli-dev \
+    postgresql-dev \
+    netcat-openbsd \
+    && rm -rf /var/cache/apk/*
+
+# Install PHP extensions
+RUN docker-php-ext-install \
+    bcmath \
+    pdo_pgsql \
+    mbstring \
+    intl \
+    zip \
+    xml \
+    pcntl \
+    opcache
+
+# Install Swoole for Octane
+RUN pecl install swoole \
+    && docker-php-ext-enable swoole
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www
 
-# Install system dependencies
-RUN apk update && apk add --no-cache \
-    git \
-    curl \
-    libpng-dev \
-    oniguruma-dev \
-    libxml2-dev \
-    postgresql-dev \
-    zip \
-    unzip \
-    linux-headers \
-    autoconf \
-    g++ \
-    make \
-    netcat-openbsd
+# Copy application files
+COPY . .
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd opcache
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
 
-# Install Redis extension
-RUN pecl install redis && docker-php-ext-enable redis
+# Install Octane
+RUN php artisan octane:install --server=swoole
 
-# Configure OPcache for production
-RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.enable_cli=0" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.memory_consumption=256" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.interned_strings_buffer=16" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.max_accelerated_files=10000" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.revalidate_freq=2" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.fast_shutdown=1" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.validate_timestamps=0" >> /usr/local/etc/php/conf.d/opcache.ini
+# Set permissions
+RUN addgroup -g 1000 www \
+    && adduser -u 1000 -G www -s /bin/sh -D www \
+    && chown -R www:www /var/www
 
-# Get latest Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+USER www
 
-# Create www-data group if it doesn't exist and create user
-RUN addgroup -g 82 -S www-data || true && \
-    adduser -D -S -G www-data -u 1000 laravel && \
-    mkdir -p /home/laravel/.composer && \
-    chown -R laravel:www-data /home/laravel && \
-    chown -R laravel:www-data /var/www
+# Expose port for Octane
+EXPOSE 8000
 
-# Copy existing application directory contents with proper ownership
-COPY --chown=laravel:www-data . /var/www
-
-# Install composer dependencies for production
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Copy and set permissions for entrypoint script
-COPY --chown=laravel:www-data docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-# Change current user to laravel
-USER laravel
-
-# Expose port 9000 and start php-fpm server
-EXPOSE 9000
-CMD ["/usr/local/bin/docker-entrypoint.sh"]
+# Use entrypoint script
+ENTRYPOINT ["./docker-entrypoint.sh"]
+CMD ["php", "artisan", "octane:start", "--server=swoole", "--host=0.0.0.0", "--port=8000"]
