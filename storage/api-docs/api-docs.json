@@ -1,0 +1,155 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "URL Shortener API",
+        "description": "API for URL shortening",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Local development server"
+        }
+    ],
+    "paths": {
+        "/api/shorten": {
+            "post": {
+                "tags": [
+                    "URLs"
+                ],
+                "summary": "Create short link",
+                "operationId": "db142371e95a86678a1212d41a96f94c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "url": {
+                                        "type": "string",
+                                        "format": "url",
+                                        "example": "https://example.com"
+                                    },
+                                    "expires_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2055-01-01T23:59:59Z",
+                                        "nullable": true
+                                    },
+                                    "custom_alias": {
+                                        "description": "Custom alias for short link (a-zA-Z0-9-_)",
+                                        "type": "string",
+                                        "example": "my-custom-link",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Short link created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "original_url": {
+                                            "type": "string"
+                                        },
+                                        "short_code": {
+                                            "type": "string"
+                                        },
+                                        "short_url": {
+                                            "type": "string"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "expires_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data"
+                    }
+                }
+            }
+        },
+        "/api/urls/{id}/stats": {
+            "get": {
+                "tags": [
+                    "URLs"
+                ],
+                "summary": "Get link statistics",
+                "operationId": "5d253d292a1a16d8b01628ef1c0ea20e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Link statistics",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "original_url": {
+                                            "type": "string"
+                                        },
+                                        "short_code": {
+                                            "type": "string"
+                                        },
+                                        "click_count": {
+                                            "type": "integer"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "expires_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Link not found"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "URLs",
+            "description": "URL shortening operations"
+        }
+    ]
+}
