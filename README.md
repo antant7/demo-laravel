@@ -27,6 +27,9 @@ Business logic is separated into services for reduced code coupling and easier m
 composer install
 ```
 ### 1. Start production server with Docker Compose (Octane + Swoole)
+
+Building the Laravel Docker image may take some time, please wait. 
+
 ```bash
 docker compose up -d
 ```
