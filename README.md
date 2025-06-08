@@ -26,11 +26,11 @@ Business logic is separated into services for reduced code coupling and easier m
 ```bash
 composer install
 ```
-### 1. Start production server with Docker Compose
+### 1. Start production server with Docker Compose (Octane + Swoole)
 ```bash
 docker compose up -d
 ```
-> Note: Minimal optimization for production. On first run, please wait up to 1 minute for migrations and application startup in container
+> Note: Some optimization for production with Octane and Swoole. On first run, please wait up to 1 minute for migrations and application startup in container
 
 ###  2. Classic local development
 
