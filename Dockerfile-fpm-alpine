@@ -49,6 +49,9 @@ RUN addgroup -g 82 -S www-data || true && \
 # Copy existing application directory contents with proper ownership
 COPY --chown=laravel:www-data . /var/www
 
+# Create .env from .env.example if .env doesn't exist
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+
 # Install composer dependencies for production
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 

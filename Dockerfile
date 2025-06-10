@@ -48,6 +48,9 @@ WORKDIR /var/www
 # Copy application files
 COPY . .
 
+# Create .env from .env.example if .env doesn't exist
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 

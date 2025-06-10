@@ -9,8 +9,8 @@ services:
     environment:
       - OCTANE_SERVER=swoole
       - OCTANE_HTTPS=false
-      # - APP_ENV=production
-      # - APP_DEBUG=false
+      # JUST FOR TEST!!! Delete APP_KEY in production mode!
+      - APP_KEY=base64:9BpTbiYHijYixU6CGgEOa5tFfCOxFfdn2/o72ZfAixY=
       - LOG_LEVEL=error
       - DB_CONNECTION=pgsql
       - DB_HOST=laravel_postgres
