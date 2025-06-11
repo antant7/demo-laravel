@@ -48,6 +48,12 @@ WORKDIR /var/www
 # Copy application files
 COPY . .
 
+# Check if vendor directory exists, if not - show error and exit
+RUN if [ ! -d "vendor" ]; then \
+        echo "Missing vendor directory. Install dependencies with `composer install`" && \
+        exit 1; \
+    fi
+
 # Create .env from .env.example if .env doesn't exist
 RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
